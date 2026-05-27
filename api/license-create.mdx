@@ -1,0 +1,237 @@
+---
+title: "POST /api/v1/licenses — Create licenses after purchase"
+sidebarTitle: "POST /api/v1/licenses"
+description: "Create licenses from your checkout backend using an API key. Idempotent by external_order_id and idempotency_key. Returns license keys ready for activation."
+---
+
+Call this endpoint from your website or checkout backend after a successful purchase to provision license keys for a customer. You provide a product code, customer details, and an idempotency key derived from your order; the server creates one license per unit of `quantity` and returns all keys in a single response. Re-submitting the same `external_order_id` and `idempotency_key` pair returns the previously created licenses instead of creating duplicates, making it safe to retry on network failure.
+
+**Endpoint:** `POST /api/v1/licenses`
+
+**Authentication:** API key with the `license:create` scope, passed in the `Authorization` header.
+
+```
+Authorization: Bearer <api_key>
+```
+
+## Request
+
+<ParamField body="product_code" type="string" required>
+  The product slug to license, e.g. `"my-plugin"`. Must match an existing product in your tenant. Accepted format: lowercase alphanumeric characters and hyphens, starting with an alphanumeric character, maximum 120 characters.
+</ParamField>
+
+<ParamField body="customer" type="object" required>
+  Customer information for the license.
+
+  <Expandable title="customer fields">
+    <ParamField body="customer.email" type="string" required>
+      Customer's email address. Maximum 320 characters. Normalized to lowercase before storage.
+    </ParamField>
+
+    <ParamField body="customer.name" type="string">
+      Optional customer display name. Maximum 160 characters.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="external_order_id" type="string" required>
+  Your order or transaction identifier from your payment system. 1–160 characters. Combined with `idempotency_key` to detect duplicate requests.
+</ParamField>
+
+<ParamField body="idempotency_key" type="string" required>
+  A stable key you derive from the order and line item, 1–160 characters. Use a value that stays constant across retries for the same purchase, e.g. `"{order_id}-{line_item_id}"`.
+</ParamField>
+
+<ParamField body="quantity" type="number">
+  Number of licenses to create. Integer, 1–100. Defaults to `1`. Each unit gets a distinct license key.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Optional key-value pairs to attach to all created licenses. Values can be any JSON type. Total serialized size must not exceed 4096 bytes.
+</ParamField>
+
+## Response
+
+The response status is `201` when at least one new license was created, or `200` when all licenses already existed (idempotent replay).
+
+<ResponseField name="created" type="boolean">
+  `true` if any new licenses were created; `false` if all were returned from a prior idempotent request.
+</ResponseField>
+
+<ResponseField name="licenses_created" type="number">
+  Count of licenses created in this request.
+</ResponseField>
+
+<ResponseField name="licenses_skipped" type="number">
+  Count of licenses that already existed and were returned idempotently.
+</ResponseField>
+
+<ResponseField name="quantity" type="number">
+  The `quantity` value from the request.
+</ResponseField>
+
+<ResponseField name="license_id" type="string">
+  UUID of the first (or only) license. Useful for single-unit orders.
+</ResponseField>
+
+<ResponseField name="license_key" type="string">
+  License key for the first (or only) license. This is the value the customer uses with `/api/licenses/activate`.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Status of the primary license, e.g. `"active"`.
+</ResponseField>
+
+<ResponseField name="customer_email" type="string">
+  Normalized (lowercase) email address the licenses are associated with.
+</ResponseField>
+
+<ResponseField name="product" type="object">
+  Product details.
+
+  <Expandable title="product fields">
+    <ResponseField name="product.id" type="string">UUID of the product.</ResponseField>
+    <ResponseField name="product.code" type="string">Product slug, matches `product_code` from the request.</ResponseField>
+    <ResponseField name="product.name" type="string">Human-readable product name.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="policy" type="object">
+  Policy applied to all created licenses.
+
+  <Expandable title="policy fields">
+    <ResponseField name="policy.id" type="string">UUID of the policy.</ResponseField>
+    <ResponseField name="policy.name" type="string">Human-readable policy name.</ResponseField>
+    <ResponseField name="policy.max_machines" type="number">Maximum number of machines each license may be activated on simultaneously.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="licenses" type="array">
+  Array of all created (or retrieved) license objects, one per unit of `quantity`.
+
+  <Expandable title="license item fields">
+    <ResponseField name="licenses[].unit" type="number">1-based unit index.</ResponseField>
+    <ResponseField name="licenses[].license_id" type="string">UUID of this license.</ResponseField>
+    <ResponseField name="licenses[].license_key" type="string">License key for this unit.</ResponseField>
+    <ResponseField name="licenses[].status" type="string">License status, e.g. `"active"`.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="idempotency" type="object">
+  Idempotency confirmation.
+
+  <Expandable title="idempotency fields">
+    <ResponseField name="idempotency.external_order_id" type="string">The `external_order_id` from the request.</ResponseField>
+    <ResponseField name="idempotency.idempotency_key" type="string">The `idempotency_key` from the request.</ResponseField>
+    <ResponseField name="idempotency.duplicate" type="boolean">`true` if the response is a replay of a prior request (no new licenses were created).</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="next" type="object">
+  Convenience links for follow-up operations.
+
+  <Expandable title="next fields">
+    <ResponseField name="next.activate_endpoint" type="string">Path to the activation endpoint: `/api/licenses/activate`.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Error codes
+
+| Code | Status | Meaning |
+|------|--------|---------|
+| `unauthorized` | 401 | API key is missing, invalid, or does not have the `license:create` scope. |
+| `validation_error` | 400 | One or more request fields failed schema validation. Check the `details` object for field-level errors. |
+| `invalid_json` | 400 | Request body is not valid JSON. |
+| `product_not_found` | 404 | No product matched `product_code` for this tenant. |
+| `policy_not_found` | 404 | No licensing policy is configured for this product. Contact your Swivel administrator. |
+| `idempotency_conflict` | 409 | The `external_order_id` and `idempotency_key` pair was previously used with different `product_code`, `customer.email`, or policy values. Do not reuse idempotency keys across different orders. |
+
+<Note>
+  This endpoint is designed for server-to-server use only. Do not expose your API key in client-side code or ship it inside your plugin binary. Generate and rotate keys in the Swivel admin portal.
+</Note>
+
+<Tip>
+  For single-unit orders, read `license_key` directly from the top-level response. For multi-unit orders, iterate over the `licenses` array — each element has its own `license_key`.
+</Tip>
+
+## Example
+
+**Request**
+
+```json
+POST /api/v1/licenses
+Authorization: Bearer sk_live_...
+Content-Type: application/json
+
+{
+  "product_code": "my-plugin",
+  "customer": {
+    "email": "customer@example.com",
+    "name": "Jane Smith"
+  },
+  "external_order_id": "order_12345",
+  "idempotency_key": "order_12345-item_1",
+  "quantity": 1,
+  "metadata": {
+    "plan": "pro",
+    "source": "website"
+  }
+}
+```
+
+**Response (201 — created)**
+
+```json
+{
+  "created": true,
+  "licenses_created": 1,
+  "licenses_skipped": 0,
+  "quantity": 1,
+  "license_id": "01920000-1111-2222-3333-444444444444",
+  "license_key": "SWVL-ABCD-EFGH-IJKL",
+  "status": "active",
+  "customer_email": "customer@example.com",
+  "product": {
+    "id": "01920000-0000-0000-0000-000000000001",
+    "code": "my-plugin",
+    "name": "My Plugin"
+  },
+  "policy": {
+    "id": "01920000-aaaa-0000-0000-000000000001",
+    "name": "Standard",
+    "max_machines": 3
+  },
+  "licenses": [
+    {
+      "unit": 1,
+      "license_id": "01920000-1111-2222-3333-444444444444",
+      "license_key": "SWVL-ABCD-EFGH-IJKL",
+      "status": "active"
+    }
+  ],
+  "idempotency": {
+    "external_order_id": "order_12345",
+    "idempotency_key": "order_12345-item_1",
+    "duplicate": false
+  },
+  "next": {
+    "activate_endpoint": "/api/licenses/activate"
+  }
+}
+```
+
+**Response (200 — duplicate / idempotent replay)**
+
+```json
+{
+  "created": false,
+  "licenses_created": 0,
+  "licenses_skipped": 1,
+  "quantity": 1,
+  "idempotency": {
+    "external_order_id": "order_12345",
+    "idempotency_key": "order_12345-item_1",
+    "duplicate": true
+  }
+}
+```

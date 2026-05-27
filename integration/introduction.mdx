@@ -1,0 +1,104 @@
+---
+title: "Integrate Swivel Licensing into your audio plugin"
+description: "Learn how the Swivel Licensing API flow works from your plugin's perspective — activation, validation, refresh, deactivation, and offline exchange."
+---
+
+Swivel Licensing gives your audio plugin a complete, server-backed license lifecycle: a signed license file your plugin can verify locally, a refresh token your plugin rotates on each session, and an offline challenge flow for air-gapped machines. This section walks you through the full API flow and the key concepts you need before writing any C++ integration code.
+
+## The licensing flow
+
+From your plugin's perspective, licensing is a sequence of API calls against the Swivel Licensing server. Each call maps to a concrete endpoint, and the plugin owns the local state between calls.
+
+<Steps>
+  <Step title="Activate">
+    On first launch — or when a user enters a license key — call `POST /api/licenses/activate` with a JSON body containing:
+
+    ```json
+    {
+      "license_key": "XXXX-XXXX-XXXX-XXXX",
+      "product_id": "product-your-plugin",
+      "fingerprint": "<machine fingerprint>",
+      "components": [
+        { "name": "cpu_id", "value": "..." },
+        { "name": "mac_address", "value": "..." }
+      ],
+      "hostname": "My-Mac-Pro",
+      "platform": "macOS"
+    }
+    ```
+
+    A successful `200` response returns a **signed license file** (PEM-encoded, Ed25519) and a **refresh token** (JWT). Persist both immediately via your `LicenseStorage` implementation.
+  </Step>
+
+  <Step title="Validate on each session">
+    On every plugin startup, call `POST /api/licenses/validate` with a `Bearer <refresh_token>` authorization header. The request body includes `product_id`, `fingerprint`, and `components` so the server can confirm the machine has not been deactivated.
+
+    A successful response returns a fresh signed license file. Replace the stored license file with this new one. If the response contains an updated `refresh_token`, atomically replace the stored token before any further call.
+  </Step>
+
+  <Step title="Refresh the token">
+    To rotate a refresh token outside of a full validation call, use `GET /api/licenses/refresh` with a `Bearer <refresh_token>` header. When the response contains a new `refresh_token`, you must replace the stored token immediately — the previous token is invalidated.
+
+    <Warning>
+      Token rotation is non-optional. If you fail to persist a rotated refresh token before the next API call, subsequent validate, refresh, and deactivate calls will fail with an invalid-token error.
+    </Warning>
+  </Step>
+
+  <Step title="Deactivate">
+    When a user deactivates the plugin, call `POST /api/licenses/deactivate` with a `Bearer <refresh_token>` header and the `machine_id` in the body. On success, clear all locally stored license state — license file, refresh token, and machine ID.
+  </Step>
+
+  <Step title="Handle offline machines">
+    For machines with no internet access, use the offline challenge flow:
+
+    1. Generate a challenge blob inside the plugin using the machine's fingerprint and license key.
+    2. Display the challenge text to the user so they can copy it to an internet-connected machine.
+    3. On the connected machine, submit the challenge to `POST /api/licenses/offline/response` to receive a signed license file.
+    4. The user pastes the response back into the plugin, which imports and stores it.
+
+    For offline deactivation, generate a deactivation request file that includes the stored refresh token, and submit it to `POST /api/licenses/offline/deactivation` from a connected machine.
+
+    <Note>
+      Offline deactivation request files contain the refresh token. Treat them as sensitive, one-time files. A successful exchange burns the token via the normal deactivation endpoint.
+    </Note>
+  </Step>
+</Steps>
+
+## Key concepts
+
+<CardGroup cols={2}>
+  <Card title="Signed license file" icon="file-shield">
+    A PEM-encoded document signed with Ed25519. It contains your tenant ID, product ID, entitlements, machine fingerprint binding, and an `issuedAt` timestamp the plugin uses for rollback protection. Verify it locally on every session start — no server round-trip required for the file check itself.
+  </Card>
+  <Card title="Refresh token" icon="arrows-rotate">
+    A JWT issued at activation and rotated on validate and refresh calls. Your plugin uses it as the Bearer token for all subsequent API calls. Store it in a platform secure store (Keychain on macOS, Credential Manager on Windows).
+  </Card>
+  <Card title="Machine fingerprint" icon="fingerprint">
+    A stable string derived from hardware identifiers. The server binds each activation to a fingerprint, and the signed license file embeds it. Your plugin checks the fingerprint on every local license verification.
+  </Card>
+  <Card title="Entitlements" icon="list-check">
+    Named capabilities encoded in the signed license file — for example, which plugin features or product tiers the license grants. Your plugin reads entitlements out of the verified license file at runtime to gate features.
+  </Card>
+</CardGroup>
+
+## Transport and storage design
+
+The JUCE client is **transport-injected**: `SwivelLicensingClient` takes an `HttpTransport&` reference rather than owning a networking layer. You can use the bundled `UrlHttpTransport` (backed by `juce::URL`) or supply your own implementation for custom retry logic, proxy support, or host-specific networking.
+
+Storage follows the same pattern. `SwivelLicenseSession` takes a `LicenseStorage&` reference, and the interface is deliberately narrow:
+
+```cpp
+class LicenseStorage
+{
+public:
+    virtual bool read (LocalLicenseState& state) const = 0;
+    virtual bool write (const LocalLicenseState& state) = 0;
+    virtual void clear() = 0;
+};
+```
+
+You implement this interface once, pointed at whatever secure local store your plugin target requires, and the session layer handles the rest of the lifecycle.
+
+## What's next
+
+See the [JUCE C++ client reference](/integration/juce-client) for step-by-step instructions on adding the client to your CMake project, wiring up storage and transport, and integrating the session lifecycle into your `AudioProcessor`.

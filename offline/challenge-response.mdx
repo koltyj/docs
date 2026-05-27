@@ -1,0 +1,95 @@
+---
+title: "Complete an offline challenge-response activation"
+description: "How to activate a Swivel Audio plugin on an offline machine using the challenge-response flow — step-by-step with request and response format."
+keywords: ["offline challenge response", "offline activation steps", "activate without internet", "swivel audio offline", "challenge exchange"]
+---
+
+The challenge-response flow activates your plugin on a machine that can't reach the Swivel server. You generate a challenge on the offline machine, submit it along with your license key from an internet-connected device, then bring the response back to complete the activation. The whole exchange takes only a few minutes.
+
+## Before you start
+
+- You have your license key. See [Find your license key](/licenses/find-your-license) if you need help.
+- You have access to an internet-connected device — a phone, laptop, or another computer.
+- You have a way to transfer text between the two machines — a USB drive, phone, or any method that works for you.
+- The plugin is installed and loaded in your DAW on the offline machine.
+
+## Steps
+
+<Steps>
+  <Step title="Generate the challenge on the offline machine">
+    Open the plugin in your DAW and open the license panel. Click **Activate Offline**. The plugin generates a challenge — a block of encoded text — and displays it in the panel. Copy the entire challenge text, or use the **Export** option to save it to a file.
+
+    <Note>
+    Each challenge is valid for 24 hours from the moment it is created. If you don't complete the exchange within that window, generate a new challenge.
+    </Note>
+  </Step>
+  <Step title="Transfer the challenge to an internet-connected device">
+    Move the challenge text to the device you'll use to contact the Swivel server. You can paste it into a notes app, save it to a file on a USB drive, or email it to yourself — any transfer method works.
+  </Step>
+  <Step title="Submit the challenge with your license key">
+    On the internet-connected device, send a `POST` request to `POST /api/licenses/offline/response` with the challenge text and your license key:
+
+    ```json
+    {
+      "challenge": "<challenge text exported from plugin>",
+      "license_key": "XXXX-XXXX-XXXX-XXXX"
+    }
+    ```
+
+    The server decodes the challenge, verifies it hasn't been used before, checks your license and entitlements, and confirms a machine slot is available. Machine limits apply to offline activation the same way they apply to online activation — if all your slots are already in use, the request will fail.
+
+    A successful response looks like this:
+
+    ```json
+    {
+      "offline_activation": true,
+      "challenge_id": "a1b2c3d4-...",
+      "expires_at": "2026-05-25T12:00:00.000Z",
+      "machine_id": "b5c6d7e8-...",
+      "machines_remaining": 1,
+      "license_file": "<signed license file>",
+      "refresh_token": "<refresh token>",
+      "license": { ... }
+    }
+    ```
+
+    The `expires_at` field shows when the offline license file expires — after that date, the plugin will lock and you'll need to repeat this process to get a fresh license.
+
+    <Warning>
+    Each challenge can only be used once. Once you submit a challenge and receive a response, that challenge is consumed. If you need to activate again, generate a new challenge from the plugin.
+    </Warning>
+  </Step>
+  <Step title="Transfer the response back to the offline machine">
+    Copy the full response — in particular, the `license_file` and `refresh_token` values — back to the offline machine using the same transfer method.
+  </Step>
+  <Step title="Import the response in the plugin">
+    In the plugin's license panel, click **Import Response** and paste or load the response. The plugin validates the signed license file and stores it locally. Activation is complete and the plugin unlocks.
+  </Step>
+</Steps>
+
+## Machine limits and offline activation
+
+The Swivel server enforces your machine limit during the challenge exchange, not at the time you import the response. If you don't have an available slot when you submit the challenge, the server returns a `machine_limit_reached` error and no response is issued. Free a slot first by [deactivating another machine](/licenses/deactivation), then generate a new challenge and try again.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="The challenge was rejected with offline_challenge_replayed">
+    You submitted the same challenge a second time. Each challenge is single-use. Generate a new challenge from the plugin and start the process again.
+  </Accordion>
+  <Accordion title="The challenge was rejected with offline_challenge_expired">
+    The challenge was generated more than 24 hours ago. Generate a new challenge — the 24-hour window starts when the plugin creates the challenge, not when you submit it.
+  </Accordion>
+  <Accordion title="The request failed with machine_limit_reached">
+    All machine slots for this license are in use. Deactivate a machine you no longer need, then generate a new challenge and repeat the exchange. See [Deactivation](/licenses/deactivation).
+  </Accordion>
+</AccordionGroup>
+
+<CardGroup cols={2}>
+  <Card title="Offline overview" icon="wifi-slash" href="/offline/overview">
+    Learn how offline activation works and when to use it.
+  </Card>
+  <Card title="Offline deactivation" icon="circle-minus" href="/offline/deactivation">
+    Free a slot from a machine that can't go online.
+  </Card>
+</CardGroup>

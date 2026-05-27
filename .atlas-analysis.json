@@ -1,0 +1,107 @@
+{
+  "projectType": "saas",
+  "projectName": "Swivel Licensing",
+  "projectDescription": "A plugin licensing platform that lets Swivel Audio customers activate, manage, and deactivate their plugin licenses across multiple machines.",
+  "theme": "almond",
+  "primaryColor": "#2c1d15",
+  "lightColor": "#94948e",
+  "darkColor": "#dedbd8",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Your Licenses",
+            "pages": [
+              "licenses/overview",
+              "licenses/find-your-license",
+              "licenses/activation",
+              "licenses/deactivation"
+            ]
+          },
+          {
+            "group": "Offline Activation",
+            "pages": [
+              "offline/overview",
+              "offline/challenge-response",
+              "offline/deactivation"
+            ]
+          },
+          {
+            "group": "Troubleshooting",
+            "pages": [
+              "troubleshooting/activation-errors",
+              "troubleshooting/machine-limit",
+              "troubleshooting/faq"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Plugin Integration",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "integration/introduction",
+              "integration/juce-client"
+            ]
+          },
+          {
+            "group": "API Reference",
+            "pages": [
+              "api/activate",
+              "api/validate",
+              "api/refresh",
+              "api/deactivate",
+              "api/offline-response",
+              "api/offline-deactivation",
+              "api/license-create"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "webhooks/overview",
+              "webhooks/shopify",
+              "webhooks/woocommerce"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "License activation on up to N machines with machine-limit enforcement",
+    "Online license validation with heartbeat and grace period support",
+    "Offline challenge-response activation for air-gapped machines",
+    "Machine deactivation to free slots for new installs",
+    "Customer account portal: license lookup, receipt viewing, machine management",
+    "Shopify and WooCommerce webhook adapters for automatic license issuance on purchase",
+    "Signed license files (Ed25519) with entitlement and machine binding",
+    "JUCE C++ client library for plugin integration"
+  ],
+  "publicApiSurface": [
+    "POST /api/licenses/activate",
+    "POST /api/licenses/validate",
+    "POST /api/licenses/refresh",
+    "POST /api/licenses/deactivate",
+    "POST /api/licenses/offline/challenge",
+    "POST /api/licenses/offline/response",
+    "POST /api/licenses/offline/deactivation",
+    "POST /api/licenses/recover",
+    "POST /api/v1/licenses",
+    "POST /api/webhooks/shopify/[tenantSlug]",
+    "POST /api/webhooks/woocommerce/[tenantSlug]",
+    "GET /api/account/licenses",
+    "GET /api/account/order-receipt"
+  ]
+}

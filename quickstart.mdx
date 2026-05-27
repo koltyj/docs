@@ -1,0 +1,77 @@
+---
+title: "Get started with Swivel Audio plugin activation"
+description: "Activate your Swivel Audio plugin in minutes — find your license key, enter it in the plugin, and verify that your license is working."
+keywords: ["plugin activation", "license key", "swivel audio", "quickstart", "sa-color activation"]
+---
+
+Activating a Swivel Audio plugin takes a few minutes. You need your license key, the plugin installed in your DAW, and an internet connection for the initial activation. After that, the plugin can work offline using the license file it stores locally.
+
+<Note>
+The plugin handles all communication with the Swivel server automatically. You only need to enter your license key — you do not send requests or manage tokens yourself.
+</Note>
+
+## Steps
+
+<Steps>
+  <Step title="Purchase the plugin">
+    Complete your purchase on the Swivel Audio store. Once your order is confirmed, the system automatically creates a license for the product you bought and sends a receipt to your email.
+  </Step>
+  <Step title="Find your license key">
+    Your license key is included in your purchase receipt email. You can also retrieve it from the Swivel customer account page by looking up the email address you used at checkout.
+
+    License keys follow a format specific to the product you purchased. Keep your key somewhere safe — you will need it any time you activate on a new machine.
+  </Step>
+  <Step title="Open the plugin in your DAW">
+    Load SA-Color (or your Swivel Audio plugin) on a track. Look for the **Activate** or **License** button in the plugin interface. This opens the activation panel.
+  </Step>
+  <Step title="Enter your license key and activate">
+    Type or paste your license key into the activation panel and click **Activate**. The plugin sends the following information to the Swivel server:
+
+    | Field | Description |
+    |---|---|
+    | `license_key` | Your license key |
+    | `fingerprint` | A unique identifier generated from your machine's hardware |
+    | `product_id` | The UUID identifying the specific Swivel Audio product |
+    | `components` | A set of hardware/OS details used for fuzzy machine matching |
+    | `hostname` | Your machine's hostname (optional) |
+    | `platform` | Your operating system (optional) |
+
+    The `fingerprint` and `components` fields are generated automatically by the plugin — you do not enter them.
+  </Step>
+  <Step title="Activation succeeds">
+    If your key is valid and a machine slot is available, the server returns a successful response. The plugin stores the signed license file and refresh token locally. You are now licensed and ready to use the plugin.
+
+    A successful activation looks like this internally:
+
+    ```json
+    {
+      "activated": true,
+      "machine_id": "...",
+      "machines_remaining": 2,
+      "license_file": "-----BEGIN SWIVEL LICENSE-----\n...",
+      "refresh_token": "eyJ...",
+      "license": {
+        "status": "active",
+        "expiry": null,
+        "entitlements": ["sa-color:full"]
+      }
+    }
+    ```
+
+    The `machines_remaining` field tells you how many more machines you can activate. The `license_file` and `refresh_token` are stored by the plugin and used for future validation checks — you do not need to handle them.
+  </Step>
+  <Step title="Verify the plugin is licensed">
+    The activation panel should now show your license as active. If you close and reopen the plugin, it validates your license automatically using the stored license file and periodically contacts the server to refresh it.
+  </Step>
+</Steps>
+
+## What to do next
+
+<CardGroup cols={2}>
+  <Card title="Manage machines" icon="desktop" href="/licenses/deactivation">
+    Deactivate a machine you no longer use to free a slot for a new computer.
+  </Card>
+  <Card title="Set up offline activation" icon="wifi-slash" href="/offline/overview">
+    Activate on a machine without internet access using the challenge-response workflow.
+  </Card>
+</CardGroup>

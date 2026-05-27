@@ -1,0 +1,91 @@
+---
+title: "POST /api/licenses/deactivate — Deactivate a machine"
+sidebarTitle: "POST /api/licenses/deactivate"
+description: "Deactivate a machine using a Bearer refresh token. Frees one activation slot. The machine_id in the request body must match the token's embedded claim."
+---
+
+Call this endpoint when a user uninstalls your plugin or wants to move the license to a different machine. It marks the machine as deactivated, decrements the license's active machine count, and invalidates the refresh token for that machine. The `machine_id` you supply in the request body must match the `machine_id` claim embedded in the Bearer token — this prevents one machine from deactivating another.
+
+**Endpoint:** `POST /api/licenses/deactivate`
+
+**Authentication:** Bearer token — the `refresh_token` returned by `/api/licenses/activate` or `/api/licenses/refresh`.
+
+```
+Authorization: Bearer <refresh_token>
+```
+
+## Request
+
+<ParamField body="machine_id" type="string" required>
+  UUID of the machine to deactivate. Must exactly match the `machine_id` claim in the Bearer token. You receive this value in the `machine_id` field of the `/api/licenses/activate` response.
+</ParamField>
+
+## Response
+
+<ResponseField name="deactivated" type="boolean">
+  Always `true` on a successful response.
+</ResponseField>
+
+<ResponseField name="machines_remaining" type="number">
+  The number of remaining active machine slots on this license after deactivation.
+</ResponseField>
+
+## Error codes
+
+| Code | Status | Meaning |
+|------|--------|---------|
+| `missing_token` | 401 | No `Authorization` header was supplied. |
+| `invalid_token` | 401 | JWT signature is invalid or the token has expired. |
+| `stale_refresh_token` | 401 | Token version is behind the current machine record. The token was already rotated by a prior refresh or deactivation call. |
+| `validation_error` | 400 | `machine_id` is missing or is not a valid UUID. |
+| `invalid_json` | 400 | Request body is not valid JSON. |
+| `machine_id_mismatch` | 403 | The `machine_id` in the request body does not match the `machine_id` claim in the Bearer token. |
+| `already_deactivated` | 409 | The machine was already deactivated. |
+| `machine_not_found` | 404 | No machine found matching the given `machine_id` and the token's `license_id` claim. |
+
+<Note>
+  After a successful deactivation the refresh token for this machine is permanently invalidated — the machine token version is incremented. You cannot use the same token to reactivate; a full `/api/licenses/activate` call is required to re-register the machine.
+</Note>
+
+<Warning>
+  Store the `machine_id` returned at activation time. You cannot retrieve it from any subsequent endpoint response — it is only returned once during activation.
+</Warning>
+
+## Example
+
+**Request**
+
+```json
+POST /api/licenses/deactivate
+Authorization: Bearer eyJhbGciOiJFZERTQSJ9...
+Content-Type: application/json
+
+{
+  "machine_id": "01920000-aaaa-bbbb-cccc-dddddddddddd"
+}
+```
+
+**Response (200)**
+
+```json
+{
+  "deactivated": true,
+  "machines_remaining": 2
+}
+```
+
+**Response (403 — machine_id_mismatch)**
+
+```json
+{
+  "error": "machine_id_mismatch"
+}
+```
+
+**Response (409 — already deactivated)**
+
+```json
+{
+  "error": "already_deactivated"
+}
+```

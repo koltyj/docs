@@ -1,0 +1,152 @@
+---
+title: "POST /api/licenses/activate — Activate a plugin license"
+sidebarTitle: "POST /api/licenses/activate"
+description: "Activate a license key on a machine with a fingerprint and product ID. Returns a signed PEM license file, a JWT refresh token, and remaining machine slots."
+---
+
+Call this endpoint once per machine to tie a license key to that machine's hardware fingerprint. On success the server returns a signed PEM license file and a JWT refresh token you store locally — both are required for subsequent calls to `/api/licenses/validate` and `/api/licenses/refresh`. The endpoint is **idempotent**: submitting the same `fingerprint` for an already-active machine refreshes its heartbeat and returns new credentials without consuming an additional activation slot.
+
+**Endpoint:** `POST /api/licenses/activate`
+
+**Authentication:** None — the license key itself is the credential for this endpoint.
+
+## Request
+
+<ParamField body="license_key" type="string" required>
+  The plaintext license key issued to the customer. Maximum 128 characters. The server looks up the license by a hash of this value — it is never stored in plaintext.
+</ParamField>
+
+<ParamField body="fingerprint" type="string" required>
+  A composite machine fingerprint string you derive from the hardware components array. Maximum 512 characters. The server stores this value and uses it for exact-match and fuzzy-match checks on subsequent validation calls.
+</ParamField>
+
+<ParamField body="product_id" type="string" required>
+  UUID of the product being activated. The license must carry an entitlement for `{product_slug}:full` or the server returns `entitlement_mismatch`.
+</ParamField>
+
+<ParamField body="components" type="array" required>
+  An array of 1–32 hardware component objects used for fuzzy fingerprint matching across minor hardware changes. Each object has two fields:
+
+  - `name` (string, 1–64 chars) — component category, e.g. `"cpu_id"`, `"mac_address"`.
+  - `value` (string, 1–256 chars) — the raw component value. The server HMACs values before storage.
+</ParamField>
+
+<ParamField body="hostname" type="string">
+  Optional machine hostname shown in the admin portal. Maximum 253 characters.
+</ParamField>
+
+<ParamField body="platform" type="string">
+  Optional OS platform string, e.g. `"darwin"` or `"win32"`. Maximum 64 characters.
+</ParamField>
+
+## Response
+
+<ResponseField name="activated" type="boolean">
+  Always `true` on a 200 response.
+</ResponseField>
+
+<ResponseField name="machine_id" type="string">
+  UUID of the activated machine record. Store this value — you supply it to `/api/licenses/deactivate`.
+</ResponseField>
+
+<ResponseField name="machines_remaining" type="number">
+  How many additional machine slots remain on this license after this activation.
+</ResponseField>
+
+<ResponseField name="license_file" type="string">
+  Ed25519-signed PEM license file. Cache this on disk and use it for offline validation while the network is unavailable.
+</ResponseField>
+
+<ResponseField name="refresh_token" type="string">
+  Signed JWT bound to this machine. Pass it as a Bearer token to `/api/licenses/validate`, `/api/licenses/refresh`, and `/api/licenses/deactivate`. The token embeds a version counter — it is invalidated whenever the machine is deactivated or the token is rotated.
+</ResponseField>
+
+<ResponseField name="license" type="object">
+  Summary of the license state at the time of activation.
+
+  <Expandable title="license fields">
+    <ResponseField name="license.status" type="string">
+      License status, e.g. `"active"`.
+    </ResponseField>
+
+    <ResponseField name="license.expiry" type="string | null">
+      ISO 8601 expiry timestamp, or `null` for perpetual licenses.
+    </ResponseField>
+
+    <ResponseField name="license.entitlements" type="array">
+      List of entitlement codes granted by this license, e.g. `["my-plugin:full"]`.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Error codes
+
+| Code | Status | Meaning |
+|------|--------|---------|
+| `validation_error` | 400 | One or more request fields failed schema validation. Check the `details` object for field-level errors. |
+| `invalid_json` | 400 | Request body is not valid JSON. |
+| `license_not_found` | 404 | No license matched the provided `license_key`. |
+| `product_not_found` | 404 | No product matched `product_id` for this tenant. |
+| `license_not_active` | 403 | License exists but its status is not `"active"` (e.g. `"suspended"` or `"revoked"`). The `status` field in the error body indicates the current state. |
+| `entitlement_mismatch` | 403 | License does not carry an entitlement for the requested product. The `entitled_products` array in the error body lists the slugs this license does cover. |
+| `machine_limit_reached` | 409 | All machine slots are occupied. The error body includes `machine_count`, `max_machines`, and an `active_machines` array with the last 8 characters of each machine ID, its platform, activation timestamp, and last heartbeat. |
+
+<Note>
+  If the `fingerprint` you send matches an existing active machine via fuzzy component matching (at least a threshold of components still agree), the server updates that machine's record instead of creating a new one. This prevents routine hardware or OS updates from consuming an extra activation slot.
+</Note>
+
+## Example
+
+**Request**
+
+```json
+POST /api/licenses/activate
+Content-Type: application/json
+
+{
+  "license_key": "SWVL-XXXX-YYYY-ZZZZ",
+  "fingerprint": "a3f9c2e1b7d4...",
+  "product_id": "01920000-0000-0000-0000-000000000001",
+  "components": [
+    { "name": "cpu_id", "value": "BFEBFBFF000906EA" },
+    { "name": "mac_address", "value": "AA:BB:CC:DD:EE:FF" }
+  ],
+  "hostname": "studio-mac.local",
+  "platform": "darwin"
+}
+```
+
+**Response (200)**
+
+```json
+{
+  "activated": true,
+  "machine_id": "01920000-aaaa-bbbb-cccc-dddddddddddd",
+  "machines_remaining": 2,
+  "license_file": "-----BEGIN LICENSE FILE-----\n...\n-----END LICENSE FILE-----",
+  "refresh_token": "eyJhbGciOiJFZERTQSJ9...",
+  "license": {
+    "status": "active",
+    "expiry": null,
+    "entitlements": ["my-plugin:full"]
+  }
+}
+```
+
+**Response (409 — machine limit reached)**
+
+```json
+{
+  "error": "machine_limit_reached",
+  "machine_count": 3,
+  "max_machines": 3,
+  "active_machines": [
+    {
+      "id_tail": "dddddddd",
+      "platform": "darwin",
+      "activated_at": "2024-01-15T10:00:00.000Z",
+      "last_heartbeat": "2024-06-01T08:30:00.000Z"
+    }
+  ]
+}
+```

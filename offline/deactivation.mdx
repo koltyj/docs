@@ -1,0 +1,86 @@
+---
+title: "Free a machine slot with offline deactivation"
+description: "How to deactivate a Swivel Audio plugin on an offline machine and free the slot — generate a deactivation request file and submit it from another device."
+keywords: ["offline deactivation", "free machine slot offline", "deactivate without internet", "swivel audio offline", "deactivation request"]
+---
+
+If a machine with an active plugin license can't go online, you can still free its slot using offline deactivation. The plugin generates a deactivation request file on the offline machine — you then submit that file from any internet-connected device to complete the deactivation. The machine slot is freed without the offline machine ever connecting to the internet.
+
+## When to use offline deactivation
+
+- Your studio machine has an active license but can't reach the internet.
+- You want to move the license to a new machine but your current slots are all in use.
+- You need to retire an offline workstation and free its activation slot.
+
+## Steps
+
+<Steps>
+  <Step title="Generate the deactivation request on the offline machine">
+    Open the plugin in your DAW and open the license panel. Click **Deactivate Offline**. The plugin generates a deactivation request — a block of encoded text that includes your machine ID and a one-time refresh token — and lets you copy or export it.
+
+    <Warning>
+    The deactivation request file contains your machine's refresh token. Treat it like a password. Don't share it, and don't store it longer than needed. Once you submit it, the token is consumed and the machine is deactivated permanently.
+    </Warning>
+  </Step>
+  <Step title="Transfer the request to an internet-connected device">
+    Move the deactivation request text to a device that can reach the Swivel server. You can paste it into a notes app, save it to a file on a USB drive, or use any transfer method available.
+
+    <Note>
+    The deactivation request expires 24 hours after it is created. Complete the submission before the window closes, or generate a new request from the plugin.
+    </Note>
+  </Step>
+  <Step title="Submit the deactivation request">
+    On the internet-connected device, send a `POST` request to `POST /api/licenses/offline/deactivation` with the request text:
+
+    ```json
+    {
+      "request": "<deactivation request text exported from plugin>"
+    }
+    ```
+
+    The server decodes the request, extracts the refresh token and machine ID, and routes through the standard deactivation path. A successful response looks like this:
+
+    ```json
+    {
+      "offline_deactivation": true,
+      "request_id": "a1b2c3d4-...",
+      "machine_id": "b5c6d7e8-...",
+      "deactivated": true,
+      "machines_remaining": 1
+    }
+    ```
+
+    `machines_remaining` confirms how many slots are now available for new activations.
+  </Step>
+  <Step title="Confirm the slot is free">
+    The machine slot is freed immediately after a successful submission. You can now activate the plugin on a new machine. The offline machine's local license state is no longer valid — the plugin on that machine will lock the next time it checks its license.
+  </Step>
+</Steps>
+
+## What the deactivation request contains
+
+The deactivation request is a base64url-encoded payload that the plugin builds from its stored license state. It includes:
+
+- `machine_id` — the unique identifier for the machine being deactivated.
+- `refresh_token` — the machine's stored refresh token, used to authenticate the deactivation with the server.
+- `request_id` — a unique ID for this deactivation request.
+- `issued_at` and `expires_at` — timestamps showing when the request was created and when it expires.
+
+The refresh token is what makes the request sensitive. After you submit it, the server increments the machine's token generation, which invalidates the submitted token and any copies of the request file. A replayed request will be rejected.
+
+## After deactivation
+
+Once the deactivation is confirmed:
+
+- The machine slot is freed and available for a new activation.
+- The refresh token from the offline machine is invalidated — the plugin on that machine can no longer validate your license.
+- You can activate on a new machine immediately. See [Activation](/licenses/activation) for steps.
+
+<CardGroup cols={2}>
+  <Card title="Offline overview" icon="wifi-slash" href="/offline/overview">
+    Understand when and why to use offline activation and deactivation.
+  </Card>
+  <Card title="Activation" icon="key" href="/licenses/activation">
+    Activate the plugin on your new machine after freeing a slot.
+  </Card>
+</CardGroup>

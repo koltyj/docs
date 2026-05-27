@@ -1,0 +1,65 @@
+---
+title: "Set up the Shopify webhook for automatic licensing"
+description: "Register the orders/paid webhook in Shopify admin to have Swivel automatically issue licenses whenever a customer completes a purchase in your store."
+keywords: ["shopify webhook", "orders/paid", "license automation", "hmac", "shopify integration"]
+---
+
+When a customer pays for an order in your Shopify store, Shopify can notify Swivel immediately. Swivel verifies the request, maps the purchased SKUs to products in your account, and issues licenses — without any action on your part after the one-time setup.
+
+## Webhook URL
+
+Your tenant-specific endpoint follows this pattern:
+
+```
+https://app.swivel.audio/api/webhooks/shopify/{tenantSlug}
+```
+
+Replace `{tenantSlug}` with the slug for your Swivel tenant. You can find it in your Swivel dashboard under **Settings → Integrations**.
+
+## Event to register
+
+Register the **`orders/paid`** event. Swivel only issues licenses for this topic. The handler also accepts `refunds/create` and `orders/cancelled` to suspend licenses when a refund or cancellation occurs.
+
+## How Shopify signs requests
+
+Shopify signs every webhook delivery by computing an HMAC-SHA256 over the raw request body using your webhook secret and base64-encoding the result. The signature is sent in the `X-Shopify-Hmac-SHA256` header. Swivel rejects any request that does not pass this verification, so only genuine Shopify deliveries are processed.
+
+You set the secret once in Shopify admin; Swivel reads it from your tenant configuration. Swivel supports secret rotation: during a rotation both the current and previous secrets are accepted until all in-flight deliveries have cleared.
+
+## SKU mapping
+
+Swivel maps each line item to a product using the variant's SKU. Go to **Swivel → Products** and add a Shopify SKU to each product you want to license automatically. Line items with no matching SKU are skipped without error.
+
+## Setup
+
+<Steps>
+  <Step title="Open webhook settings in Shopify admin">
+    Log in to your Shopify admin. Go to **Settings → Notifications**, then scroll to the bottom and click **Webhooks**.
+  </Step>
+  <Step title="Create a webhook">
+    Click **Create webhook**. Set the following fields:
+
+    | Field | Value |
+    |---|---|
+    | Event | `Order payment` (`orders/paid`) |
+    | Format | `JSON` |
+    | URL | `https://app.swivel.audio/api/webhooks/shopify/{tenantSlug}` |
+    | Webhook API version | Latest stable version |
+  </Step>
+  <Step title="Copy the signing secret">
+    After saving, Shopify displays a **signing secret** for the webhook. Copy this value.
+  </Step>
+  <Step title="Add the secret to Swivel">
+    In your Swivel dashboard, go to **Settings → Integrations → Shopify**. Paste the signing secret into the **Webhook secret** field and save.
+  </Step>
+  <Step title="Send a test delivery">
+    Back in Shopify, click **Send test notification** on the webhook you just created. Swivel will receive the test event. Check **Swivel → Logs** to confirm the event was received and verified.
+  </Step>
+  <Step title="Map your SKUs">
+    Go to **Swivel → Products** and add the Shopify SKU to each product. Any line item whose SKU is not mapped is silently skipped.
+  </Step>
+</Steps>
+
+## Idempotency
+
+Shopify retries failed webhook deliveries automatically. Swivel uses the `X-Shopify-Webhook-Id` header to deduplicate events: if the same delivery ID arrives more than once, Swivel returns `200 OK` without creating a second license.

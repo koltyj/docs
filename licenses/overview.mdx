@@ -1,0 +1,59 @@
+---
+title: "Your Swivel Audio plugin licenses explained"
+description: "Understand what a Swivel Audio license is, what the status values mean, how machine limits work, and how your license is tied to your email."
+keywords: ["swivel license", "license status", "machine limit", "entitlements", "license expiry", "grace period"]
+---
+
+A Swivel Audio license is the entitlement that lets you run a plugin on a machine. Each license is tied to a specific product — for example, SA-Color — and linked to the email address you used at purchase. You never need to create an account or register separately; your email is the identifier.
+
+## What a license contains
+
+Every license has the following:
+
+- **License key** — a unique string you enter in the plugin's activation panel to unlock it on a machine.
+- **Product** — the specific plugin the license covers (for example, `sa-color`).
+- **Status** — whether the license is currently valid. See the table below.
+- **Entitlements** — the features the license grants. A full license includes a code like `sa-color:full`, which the plugin checks when you activate.
+- **Machine limit** — the maximum number of machines you can activate at the same time. This number is set per product when the license is created.
+- **Expiry** — an optional date after which the license enters a grace period. Many licenses do not expire.
+
+## License statuses
+
+| Status | What it means for you |
+|---|---|
+| `active` | Your license is valid. The plugin runs normally. |
+| `expired` | The license term ended. You have a 7-day grace period before the plugin stops working. |
+| `suspended` | The license has been temporarily paused, usually due to a payment issue. Contact Swivel support to restore access. |
+| `revoked` | The license has been permanently disabled, for example after a refund or chargeback. The plugin will not work. |
+
+## Grace period after expiry
+
+If your license has an expiry date and that date passes, the plugin does not stop immediately. You have a **7-day grace period** during which the plugin continues to work normally. The plugin displays a message showing the renewal deadline. After the grace period ends, validation fails and the plugin stops processing until you renew.
+
+## Machine limit
+
+Your license allows you to run the plugin on up to a fixed number of machines at the same time. The limit is set when your license is created and depends on the product you purchased. For example, if your limit is 3 machines, you can have the plugin active on 3 computers simultaneously.
+
+<Note>
+If you reach your machine limit and want to add a new computer, you need to deactivate one of your existing machines first. See [Deactivation](/licenses/deactivation) for how to free a slot.
+</Note>
+
+## Entitlements
+
+An entitlement describes exactly what product access your license grants. For a full license to SA-Color, the entitlement code is `sa-color:full`. The plugin checks this code when you activate — if your license does not include the matching entitlement for the product you are trying to activate, the activation will fail with an entitlement mismatch.
+
+## How your license is linked to your email
+
+When your purchase is processed, the system creates your license and stores the email address from your order. You can look up all the licenses associated with your email at any time from the account page. No password or separate registration is required — your email and order ID are enough to access your license information.
+
+<CardGroup cols={2}>
+  <Card title="Find your license key" icon="magnifying-glass" href="/licenses/find-your-license">
+    Where to find your key and what to do if you cannot locate it.
+  </Card>
+  <Card title="Activation" icon="key" href="/licenses/activation">
+    How to activate the plugin on a machine using your license key.
+  </Card>
+  <Card title="Deactivation" icon="rotate-left" href="/licenses/deactivation">
+    How to free a machine slot so you can activate on a different computer.
+  </Card>
+</CardGroup>

@@ -1,0 +1,171 @@
+---
+title: "POST /api/licenses/validate — Validate an active license"
+sidebarTitle: "POST /api/licenses/validate"
+description: "Validate a machine's active license using a Bearer refresh token. Returns a validity code, fresh signed license file, and the next scheduled check-in time."
+---
+
+Call this endpoint on a regular schedule (defined by `next_check_at` in the response) to confirm the license is still valid and refresh the local license file. The endpoint performs a five-step check: JWT verification, license status, machine deactivation state, entitlement match, and fingerprint match. It updates the machine's `last_heartbeat` timestamp on every successful call.
+
+**Endpoint:** `POST /api/licenses/validate`
+
+**Authentication:** Bearer token — the `refresh_token` returned by `/api/licenses/activate` or `/api/licenses/refresh`.
+
+```
+Authorization: Bearer <refresh_token>
+```
+
+## Request
+
+<ParamField body="fingerprint" type="string" required>
+  The current composite machine fingerprint. Maximum 512 characters. If this value has changed since activation, the server attempts a fuzzy component match using the `components` array — include `components` whenever the fingerprint may have drifted.
+</ParamField>
+
+<ParamField body="product_id" type="string" required>
+  UUID of the product to validate entitlement for. The license must carry a `{product_slug}:full` entitlement or the server returns `ENTITLEMENT_MISMATCH`.
+</ParamField>
+
+<ParamField body="components" type="array">
+  Optional array of 1–32 hardware component objects. Required when `fingerprint` differs from the value on record, so the server can attempt a fuzzy match rather than rejecting immediately. Each object:
+
+  - `name` (string, 1–64 chars)
+  - `value` (string, 1–256 chars)
+</ParamField>
+
+## Response
+
+### Valid license (200)
+
+<ResponseField name="valid" type="boolean">
+  `true` when the license passed all checks.
+</ResponseField>
+
+<ResponseField name="code" type="string">
+  Machine-readable validity code. See the table below for all possible values.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current license status from the database, e.g. `"active"` or `"expired"`.
+</ResponseField>
+
+<ResponseField name="entitlements" type="array">
+  List of entitlement codes granted by this license, e.g. `["my-plugin:full"]`.
+</ResponseField>
+
+<ResponseField name="license_file" type="string">
+  Freshly signed PEM license file. Replace the cached copy on disk with this value.
+</ResponseField>
+
+<ResponseField name="next_check_at" type="string">
+  ISO 8601 timestamp indicating when the plugin should next call this endpoint, derived from the policy's `heartbeatIntervalS`. Default interval is 24 hours when no policy value is set.
+</ResponseField>
+
+### Grace period response (200)
+
+When a license has expired but is within the 7-day grace window, the server returns `valid: true` with the `GRACE_PERIOD` code:
+
+<ResponseField name="valid" type="boolean">
+  `true` during the grace period.
+</ResponseField>
+
+<ResponseField name="code" type="string">
+  `"GRACE_PERIOD"`
+</ResponseField>
+
+<ResponseField name="grace" type="boolean">
+  `true`
+</ResponseField>
+
+<ResponseField name="grace_expires_at" type="string">
+  ISO 8601 timestamp when the grace period ends and the license will be fully rejected.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Human-readable renewal reminder string, e.g. `"License expired. Renew by June 1, 2025."`.
+</ResponseField>
+
+## Validity codes
+
+| Code | `valid` | Meaning |
+|------|---------|---------|
+| `VALID` | `true` | License is active and all checks passed. |
+| `GRACE_PERIOD` | `true` | License expiry passed but within the 7-day grace window. |
+| `EXPIRED` | `false` | License has expired and the grace period is over. |
+| `SUSPENDED` | `false` | License has been administratively suspended. |
+| `REVOKED` | `false` | License has been permanently revoked. |
+| `MACHINE_DEACTIVATED` | `false` | This machine has been deactivated. |
+| `MACHINE_MISMATCH` | `false` | Fingerprint and component data do not match the registered machine. The `match.matched` and `match.total` fields indicate how many components were compared. |
+| `ENTITLEMENT_MISMATCH` | `false` | License does not include an entitlement for the requested `product_id`. |
+| `STALE_TOKEN` | `false` (401) | Token version is behind the current machine record — the token was rotated by a prior refresh or deactivation. |
+| `INVALID_TOKEN` | — (401) | JWT signature is invalid or the token has expired. |
+
+## Error codes
+
+| Code | Status | Meaning |
+|------|--------|---------|
+| `missing_token` | 401 | No `Authorization` header was supplied. |
+| `invalid_request` | 400 | Request body failed schema validation. Check `details` for field-level errors. |
+| `invalid_json` | 400 | Request body is not valid JSON. |
+| `license_not_found` | 404 | No license found for the token's `license_id` claim. |
+| `machine_not_found` | 404 | No machine found for the token's `machine_id` claim. |
+
+<Warning>
+  When `valid` is `false`, replace the cached license file from disk and block access to the protected feature. Do not continue to use a stale cached file once the server has returned an invalid code.
+</Warning>
+
+<Tip>
+  Schedule the next check at the `next_check_at` timestamp. Checking significantly before this time wastes network calls; checking significantly after may cause unnecessary offline rejections if the license state has changed.
+</Tip>
+
+## Example
+
+**Request**
+
+```json
+POST /api/licenses/validate
+Authorization: Bearer eyJhbGciOiJFZERTQSJ9...
+Content-Type: application/json
+
+{
+  "fingerprint": "a3f9c2e1b7d4...",
+  "product_id": "01920000-0000-0000-0000-000000000001",
+  "components": [
+    { "name": "cpu_id", "value": "BFEBFBFF000906EA" },
+    { "name": "mac_address", "value": "AA:BB:CC:DD:EE:FF" }
+  ]
+}
+```
+
+**Response (200 — valid)**
+
+```json
+{
+  "valid": true,
+  "code": "VALID",
+  "status": "active",
+  "entitlements": ["my-plugin:full"],
+  "license_file": "-----BEGIN LICENSE FILE-----\n...\n-----END LICENSE FILE-----",
+  "next_check_at": "2024-06-02T08:30:00.000Z"
+}
+```
+
+**Response (200 — grace period)**
+
+```json
+{
+  "valid": true,
+  "code": "GRACE_PERIOD",
+  "status": "expired",
+  "grace": true,
+  "grace_expires_at": "2024-06-08T00:00:00.000Z",
+  "message": "License expired. Renew by June 8, 2024."
+}
+```
+
+**Response (200 — expired)**
+
+```json
+{
+  "valid": false,
+  "code": "EXPIRED"
+}
+```

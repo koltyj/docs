@@ -1,0 +1,81 @@
+---
+title: "Find your Swivel Audio license key"
+description: "Three ways to retrieve your Swivel Audio license key — purchase receipt email, account page, or order receipt lookup — plus how to recover a lost key."
+keywords: ["find license key", "lost license key", "license recovery", "swivel audio license", "order receipt"]
+---
+
+Your license key is issued automatically when your purchase is confirmed. It is a string up to 128 characters long, unique to the license for your product. You do not choose it — the system generates it and ties it to your order and email address.
+
+## Three ways to find your key
+
+<AccordionGroup>
+  <Accordion title="1. Your purchase receipt email">
+    When your order is completed, Swivel sends a receipt email to the address you provided at checkout. That email includes your license key for each product in the order.
+
+    Check your inbox (and spam folder) for a message from Swivel Audio. The subject line typically references your order or product name. Your license key appears clearly in the email body.
+
+    <Tip>
+    Keep this email somewhere safe — it is the fastest way to retrieve your key in the future.
+    </Tip>
+  </Accordion>
+  <Accordion title="2. The Swivel account page">
+    You can look up all licenses associated with your email address from the Swivel customer account page. This page does not require a password — enter your email address and your order ID to authenticate.
+
+    The account page shows:
+    - The product name and status for each license
+    - The last few characters of your license key (the key tail)
+    - The machines currently activated on each license
+
+    <Note>
+    For security, the account page shows only the last several characters of your key. To see the full key, use the order receipt lookup described below.
+    </Note>
+  </Accordion>
+  <Accordion title="3. Order receipt lookup">
+    The order receipt page shows the full plaintext license key for a given order, provided you can supply your email address and order ID. You can find your order ID in your purchase confirmation email.
+
+    To access the receipt, go to the Swivel account area and enter your email address and order ID. The system verifies that the email matches the order on file before displaying the key.
+  </Accordion>
+</AccordionGroup>
+
+## Recovering a lost license key
+
+If you cannot find your receipt email and do not have your order ID, you can use the license key recovery feature. Submit your email address and Shopify order ID, and the system sends your key to the email on file.
+
+<Steps>
+  <Step title="Gather your order ID">
+    Your Shopify order ID is the numeric identifier from your purchase confirmation. It appears in the subject or body of your receipt email (for example, `#12345`). Check your email client's search for messages from Swivel Audio or the store platform.
+  </Step>
+  <Step title="Submit the recovery request">
+    Go to the Swivel Audio account area and find the **Recover your license key** option. Enter:
+    - Your **email address** — the address you used when you purchased
+    - Your **order ID** — the Shopify order number from your receipt
+  </Step>
+  <Step title="Check your email">
+    If the email and order ID match a license on file, the system sends your key to the email address associated with the order. Check your inbox within a few minutes.
+
+    <Note>
+    The response from the recovery form is always the same regardless of whether a match was found. This is intentional — it prevents others from testing whether a given email is in the system. If you do not receive an email, double-check that you entered the correct order ID and email address.
+    </Note>
+  </Step>
+</Steps>
+
+<Warning>
+The recovery endpoint is rate-limited to 10 requests per IP per hour and 5 requests per email per hour. If you submit multiple requests quickly, some will be silently dropped. Wait a few minutes before trying again.
+</Warning>
+
+## What to do if you still cannot find your key
+
+If you have tried all three methods and still cannot locate your license key, contact Swivel Audio support. Have the following ready:
+
+- The email address you used at purchase
+- Your order ID or a copy of your receipt
+- The name of the product you purchased
+
+<CardGroup cols={2}>
+  <Card title="Activate your plugin" icon="key" href="/licenses/activation">
+    Once you have your key, activate the plugin on your machine.
+  </Card>
+  <Card title="License overview" icon="file-lines" href="/licenses/overview">
+    Learn about license statuses, machine limits, and entitlements.
+  </Card>
+</CardGroup>

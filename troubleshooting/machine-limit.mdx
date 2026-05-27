@@ -1,0 +1,115 @@
+---
+title: 'What to do when you reach the activation machine limit'
+description: 'Understand how Swivel Audio machine slots work, what counts as a new machine, and how to free a slot so you can activate on a new computer.'
+keywords: ['machine limit', 'machine_limit_reached', 'deactivate machine', 'activation slots', 'Swivel Audio']
+---
+
+Every Swivel Audio license includes a fixed number of simultaneous machine activations. When all slots are full, you'll receive a `machine_limit_reached` error and the plugin won't activate until you free at least one slot.
+
+## What the machine limit is
+
+Each license key has a `max_machines` value that defines how many computers can run the plugin at the same time. When you activate the plugin on a machine, that machine claims one slot. When you deactivate, the slot is returned and becomes available for another machine.
+
+When a `machine_limit_reached` error occurs, the response includes details about your current usage:
+
+| Field | Description |
+|---|---|
+| `machine_count` | How many slots are currently occupied |
+| `max_machines` | The total number of slots your license allows |
+| `active_machines` | An array of the machines currently using slots |
+
+Each entry in `active_machines` includes:
+
+| Field | Description |
+|---|---|
+| `id_tail` | The last few characters of the machine ID, for identification |
+| `platform` | The operating system (e.g., `macOS`, `Windows`) |
+| `activated_at` | When this machine first activated |
+| `last_heartbeat` | The most recent time the plugin checked in from this machine |
+
+Use the `last_heartbeat` timestamp to identify machines that haven't been used recently — those are the best candidates to deactivate.
+
+## How hardware changes affect your slots
+
+Swivel Audio uses **fuzzy matching** when identifying machines. Small, routine changes to your hardware or software do not register as a new machine and will not consume an additional slot:
+
+- Adding or upgrading RAM
+- Installing a new SSD or HDD alongside existing storage
+- Routine OS updates and security patches
+- Updating audio drivers
+
+Only significant changes to core hardware identifiers — such as replacing your motherboard or CPU — may trigger a `MACHINE_MISMATCH` error, which requires re-activation.
+
+<Note>
+  Reinstalling your operating system reuses the same machine slot. You don't need to deactivate before reinstalling, and you won't lose a slot in the process.
+</Note>
+
+## How to free a slot
+
+Choose the method that works best for your situation:
+
+<AccordionGroup>
+
+  <Accordion title="Deactivate directly from the plugin">
+    If you still have access to the machine you want to remove, this is the fastest option.
+
+    <Steps>
+      <Step title="Open the plugin on the machine you want to deactivate">
+        Load any project that uses the plugin, or open the plugin in standalone mode if supported.
+      </Step>
+      <Step title="Navigate to the license panel">
+        Click the **License** or **Activation** button in the plugin's interface.
+      </Step>
+      <Step title="Click Deactivate">
+        Confirm the deactivation. The slot is freed immediately and the plugin stops running on that machine.
+      </Step>
+    </Steps>
+  </Accordion>
+
+  <Accordion title="Deactivate from your account portal">
+    Use this method when you can't access the machine you want to remove — for example, if it was sold, is broken, or is no longer available.
+
+    <Steps>
+      <Step title="Log in to your Swivel Audio account portal">
+        Sign in with the email address associated with your purchase.
+      </Step>
+      <Step title="Open My licenses">
+        Find the license key for the plugin you need to manage.
+      </Step>
+      <Step title="View active machines">
+        Click **Active machines** to see the list of slots in use. Use the `last_heartbeat` and `platform` fields to identify which machine to remove.
+      </Step>
+      <Step title="Deactivate the machine">
+        Click **Deactivate** next to the machine you want to free. The slot is released immediately.
+      </Step>
+    </Steps>
+  </Accordion>
+
+  <Accordion title="Offline deactivation">
+    If the machine to deactivate has no internet access, you can perform an offline deactivation.
+
+    <Steps>
+      <Step title="Open the plugin's license panel on the offline machine">
+        Navigate to the licensing screen inside the plugin.
+      </Step>
+      <Step title="Select Offline deactivation">
+        The plugin generates a deactivation request file.
+      </Step>
+      <Step title="Transfer the file to an internet-connected device">
+        Use a USB drive or any other transfer method.
+      </Step>
+      <Step title="Submit the file in your account portal">
+        Log in to the portal, go to **My licenses → Offline deactivation**, and upload the file. The slot is released once the file is processed.
+      </Step>
+    </Steps>
+  </Accordion>
+
+</AccordionGroup>
+
+## Lost machine — can't deactivate
+
+If a machine was lost, stolen, or destroyed and you cannot deactivate it through any of the methods above, contact Swivel Audio support. Provide your license key and a description of the situation. Support can manually release the slot on your behalf.
+
+<Warning>
+  Support may ask you to verify ownership of the license before releasing a slot remotely. Have your order confirmation or purchase receipt ready.
+</Warning>

@@ -1,0 +1,30 @@
+---
+title: "Connect your store to Swivel with webhooks"
+description: "Webhooks let Shopify and WooCommerce notify Swivel the moment a purchase is confirmed, triggering automatic license creation for your customers."
+keywords: ["webhooks", "shopify", "woocommerce", "license automation", "store integration"]
+---
+
+Swivel can issue licenses automatically the moment a customer completes a purchase. When you configure a webhook in your store, it sends a signed HTTP request to a Swivel endpoint every time an order is paid. Swivel verifies the signature, maps the purchased products to your configured SKUs, and creates the corresponding licenses — no manual steps required.
+
+## How it works
+
+1. A customer completes checkout in your Shopify or WooCommerce store.
+2. The store sends a signed webhook event to your Swivel endpoint.
+3. Swivel verifies the HMAC signature using your webhook secret.
+4. Swivel maps each line item's SKU to a product in your account.
+5. A license is created and the customer receives their key.
+
+## Idempotency
+
+Swivel deduplicates webhook events by the unique delivery ID sent in each request. If the same event is delivered more than once — due to a network retry or a re-delivery from your store — Swivel returns a `200 OK` without creating a duplicate license. You do not need to guard against this on your end.
+
+## Supported platforms
+
+<CardGroup cols={2}>
+  <Card title="Shopify" icon="shopify" href="/webhooks/shopify">
+    Register the `orders/paid` event in Shopify admin and point it at your tenant endpoint.
+  </Card>
+  <Card title="WooCommerce" icon="wordpress" href="/webhooks/woocommerce">
+    Create an order webhook in WooCommerce settings and point it at your tenant endpoint.
+  </Card>
+</CardGroup>

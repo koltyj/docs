@@ -1,0 +1,174 @@
+---
+title: 'Fix Swivel Audio plugin activation and license errors'
+description: 'Step-by-step guidance for every activation error code you might encounter when licensing a Swivel Audio plugin, with clear fixes for each.'
+keywords: ['activation error', 'license error', 'validation_error', 'license_not_found', 'machine_limit_reached', 'INVALID_TOKEN', 'EXPIRED', 'Swivel Audio']
+---
+
+When your Swivel Audio plugin fails to activate, it returns an error code that tells you exactly what went wrong. Find your error code below and follow the steps to resolve it.
+
+<AccordionGroup>
+
+  <Accordion title="400 validation_error — key format is wrong">
+    The license key you entered doesn't match the expected format. This usually means there's a typo, an extra space, or a missing character.
+
+    <Steps>
+      <Step title="Copy the key directly from your email or account portal">
+        Avoid retyping the key manually. Select all, copy, then paste to eliminate transcription mistakes.
+      </Step>
+      <Step title="Remove any leading or trailing spaces">
+        Some email clients wrap long strings across lines. Make sure the full key is on a single line with no whitespace at either end.
+      </Step>
+      <Step title="Check for lookalike characters">
+        Common mix-ups: the letter `O` vs the digit `0`, the letter `l` vs the digit `1`, and the letter `I` vs the digit `1`.
+      </Step>
+      <Step title="Re-enter the key in the plugin">
+        Paste the corrected key and try activating again.
+      </Step>
+    </Steps>
+  </Accordion>
+
+  <Accordion title="404 license_not_found — key doesn't exist">
+    The server has no record of this license key. It may have been entered incorrectly, or the purchase may not have completed.
+
+    <Steps>
+      <Step title="Double-check the key">
+        Confirm you are using the key from the correct order confirmation email for this specific product.
+      </Step>
+      <Step title="Use the license recovery tool">
+        Go to your Swivel Audio account portal and use the **Recover license** option. Enter your purchase email address to resend all associated keys.
+      </Step>
+      <Step title="Contact support if the key still isn't found">
+        If recovery doesn't surface the key, reach out to Swivel Audio support with your order number or payment receipt.
+      </Step>
+    </Steps>
+  </Accordion>
+
+  <Accordion title="403 license_not_active — license is suspended or revoked">
+    Your license exists but has been suspended or revoked, which prevents activation.
+
+    <Warning>
+      A suspended license cannot be activated until the suspension is lifted. Attempting to activate multiple times will not help and may flag your account.
+    </Warning>
+
+    Contact Swivel Audio support and provide your license key and order details. Support can review the account status and explain the reason for suspension.
+  </Accordion>
+
+  <Accordion title="403 entitlement_mismatch — key doesn't cover this product">
+    The license key you used is valid, but it was issued for a different Swivel Audio plugin — not the one you are trying to activate.
+
+    <Steps>
+      <Step title="Confirm which product the key belongs to">
+        Check your order confirmation email. The product name is listed next to each license key.
+      </Step>
+      <Step title="Find the correct key for this plugin">
+        Open your account portal and look under **My licenses** to find the key associated with the plugin you're installing.
+      </Step>
+      <Step title="Enter the matching key in the plugin">
+        Paste the correct product key and activate again.
+      </Step>
+    </Steps>
+  </Accordion>
+
+  <Accordion title="409 machine_limit_reached — all activation slots are full">
+    Your license has a maximum number of machines it can be active on simultaneously, and all slots are currently occupied.
+
+    <Steps>
+      <Step title="Review your active machines">
+        Log in to your Swivel Audio account portal and go to **My licenses → Active machines** to see which machines are using your slots.
+      </Step>
+      <Step title="Deactivate a machine you no longer use">
+        Select any machine you no longer need and click **Deactivate**. This frees up one slot immediately.
+      </Step>
+      <Step title="Activate on the new machine">
+        Return to the plugin on your new machine and enter your license key.
+      </Step>
+    </Steps>
+
+    <Tip>
+      If you can still access an old machine, you can deactivate directly from the plugin's license panel without needing the portal. See [What to do when you hit the machine limit](/troubleshooting/machine-limit) for the full guide.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="401 INVALID_TOKEN or STALE_TOKEN — session token is no longer valid">
+    The local authorization token the plugin stored has expired or been invalidated. This can happen after a server-side license change or a long period of offline use.
+
+    <Steps>
+      <Step title="Open the plugin's license panel">
+        In your DAW, open the plugin and navigate to its licensing or activation screen.
+      </Step>
+      <Step title="Sign out or deactivate the current session">
+        Click **Deactivate** or **Sign out**, whichever option is shown.
+      </Step>
+      <Step title="Re-enter your license key">
+        Enter your key and activate again to receive a fresh token.
+      </Step>
+    </Steps>
+
+    <Note>
+      You don't need to free up a machine slot to fix this. Re-activating on the same machine simply refreshes the token and does not consume an additional slot.
+    </Note>
+  </Accordion>
+
+  <Accordion title="GRACE_PERIOD — license expired but grace window is active">
+    Your license subscription has lapsed, but Swivel Audio provides a 7-day grace period so you can continue working while you renew.
+
+    <Warning>
+      The plugin will stop working when the grace period ends. Renew before the deadline to avoid an interruption to your workflow.
+    </Warning>
+
+    Log in to your Swivel Audio account portal and renew your subscription under **My licenses**. Once renewed, the plugin will validate the new expiry date automatically on its next heartbeat — no re-activation required.
+  </Accordion>
+
+  <Accordion title="EXPIRED — license has expired">
+    Your license subscription has expired and the grace period has also passed. The plugin will not function until you renew.
+
+    <Steps>
+      <Step title="Log in to your account portal">
+        Go to your Swivel Audio account and navigate to **My licenses**.
+      </Step>
+      <Step title="Renew the subscription">
+        Click **Renew** next to the expired license and complete the purchase.
+      </Step>
+      <Step title="Re-activate the plugin">
+        After renewing, open the plugin's license panel, deactivate, and then re-activate with your key to pick up the new expiry date.
+      </Step>
+    </Steps>
+  </Accordion>
+
+  <Accordion title="MACHINE_DEACTIVATED — this machine was deactivated">
+    The machine you are on was explicitly deactivated — either from another device, through the account portal, or by support. The plugin will not run until you re-activate.
+
+    <Steps>
+      <Step title="Open the plugin's license panel">
+        Navigate to the licensing screen inside the plugin.
+      </Step>
+      <Step title="Re-enter your license key and activate">
+        This re-registers the current machine and consumes one slot. Check that you have a free slot available first.
+      </Step>
+    </Steps>
+
+    <Note>
+      If your license is at its machine limit, you need to free a slot before re-activating. See [What to do when you hit the machine limit](/troubleshooting/machine-limit).
+    </Note>
+  </Accordion>
+
+  <Accordion title="MACHINE_MISMATCH — major hardware change detected">
+    The hardware fingerprint the plugin stored no longer matches your current machine. This typically happens after a significant hardware upgrade such as replacing your motherboard or CPU.
+
+    <Steps>
+      <Step title="Deactivate the stale machine entry from the portal">
+        Log in to your account portal, go to **My licenses → Active machines**, and remove the old machine entry.
+      </Step>
+      <Step title="Re-activate on the current hardware">
+        Enter your license key in the plugin to register the updated hardware fingerprint.
+      </Step>
+    </Steps>
+
+    <Note>
+      Minor changes — such as a RAM upgrade, adding a drive, or routine OS updates — do not trigger a mismatch. Only significant changes to core hardware identifiers cause this error.
+    </Note>
+  </Accordion>
+
+</AccordionGroup>
+
+If you've worked through the steps above and the error persists, contact Swivel Audio support with your license key, the error code, and a brief description of what you tried.

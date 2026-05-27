@@ -1,0 +1,76 @@
+---
+title: "How Swivel Audio plugin licensing works"
+description: "Learn how Swivel Audio plugin licensing works — license keys, machine activation, machine limits, the 7-day grace period, and your customer account."
+keywords: ["swivel licensing", "license key", "machine activation", "plugin license", "sa-color"]
+---
+
+Swivel Licensing is the activation system behind Swivel Audio plugins. When you purchase a plugin, a license is automatically created and tied to your email address. You activate that license inside the plugin itself — no third-party portals or dongles required.
+
+## Key concepts
+
+**License key** — A unique string you receive after purchase. You enter it in the plugin's activation panel to unlock processing on a given machine.
+
+**Machine activation** — The process of registering a specific computer with your license. When you activate, the plugin contacts the Swivel server, which registers your machine and returns a signed license file stored locally by the plugin.
+
+**Machine limit** — Each license allows activation on a set number of machines, determined by the product you purchased. If you reach that limit, you need to deactivate an existing machine before activating a new one.
+
+**License status** — Your license can be in one of four states:
+
+| Status | Meaning |
+|---|---|
+| `active` | License is valid. The plugin works normally. |
+| `suspended` | License has been temporarily paused. Contact support. |
+| `revoked` | License has been permanently disabled (e.g., after a refund). |
+| `expired` | License term has ended. A 7-day grace period applies before the plugin stops. |
+
+## How a license is created
+
+When your purchase is confirmed, the Swivel system automatically issues a license for the product you bought. You do not need to take any action — the license is ready to activate as soon as you receive your receipt email.
+
+## What happens when you activate
+
+When you enter your license key and click **Activate** in the plugin, the plugin sends your key, a unique machine fingerprint, and the product ID to the Swivel server. If your key is valid and a machine slot is available, the server responds with:
+
+- A **signed license file** stored locally by the plugin, used to validate your license even when offline
+- A **refresh token** the plugin uses to re-validate your license periodically
+
+You do not interact with these files directly — the plugin manages them automatically.
+
+## Machine limits and fuzzy matching
+
+Each license has a maximum number of machines it can be active on at once. If you reinstall your operating system or upgrade hardware, the plugin uses fuzzy machine matching to recognize your computer even if the fingerprint has changed slightly. Normal hardware drift does not count as a new activation.
+
+<Note>
+Deactivating a machine frees that slot so you can activate on a different computer. You can deactivate machines from your account page or from inside the plugin.
+</Note>
+
+## Grace period after expiry
+
+If your license expires, you have a **7-day grace period** during which the plugin continues to work normally. After the grace period ends, the plugin stops processing until you renew. The plugin displays a message during the grace period with the renewal deadline.
+
+## Offline mode
+
+If you work without an internet connection, the plugin can operate using its locally stored license file. For air-gapped machines or extended offline use, Swivel supports a **challenge-response** workflow that lets you generate an offline license without ever connecting the machine to the internet.
+
+<Info>
+The offline license file has its own validity window set by the product policy. You will need to reconnect periodically to refresh it, unless you use challenge-response activation.
+</Info>
+
+## Your account
+
+You can look up your licenses, check machine status, and deactivate machines from the Swivel customer account portal. No account registration is required — licenses are found by the email address used at purchase.
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="bolt" href="/quickstart">
+    Step-by-step guide from purchase to your first successful activation.
+  </Card>
+  <Card title="Activation" icon="key" href="/licenses/activation">
+    How machine activation works and what to expect after you enter your license key.
+  </Card>
+  <Card title="Deactivation" icon="rotate-left" href="/licenses/deactivation">
+    Free up a machine slot by deactivating a computer you no longer use.
+  </Card>
+  <Card title="Offline activation" icon="wifi-slash" href="/offline/overview">
+    Activate and use Swivel Audio plugins on machines without an internet connection.
+  </Card>
+</CardGroup>

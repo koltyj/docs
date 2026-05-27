@@ -1,0 +1,141 @@
+---
+title: 'Swivel Audio licensing: frequently asked questions'
+description: 'Answers to the most common questions about activating, managing, and troubleshooting Swivel Audio plugin licenses — from machine limits to expired keys.'
+keywords: ['FAQ', 'license questions', 'activation', 'machine limit', 'offline use', 'Swivel Audio licensing']
+---
+
+If you're unsure how Swivel Audio licensing works or you've run into an unexpected situation, you'll likely find your answer below.
+
+<AccordionGroup>
+
+  <Accordion title="How many machines can I activate on?">
+    The number of simultaneous activations depends on your license type. You can see the exact limit for each license in your Swivel Audio account portal under **My licenses**.
+
+    When you need to activate on a new machine and all slots are full, you must first deactivate one of the machines currently using a slot. See [What to do when you hit the machine limit](/troubleshooting/machine-limit) for step-by-step instructions.
+  </Accordion>
+
+  <Accordion title="I lost my license key — how do I recover it?">
+    You can recover your license key without contacting support.
+
+    <Steps>
+      <Step title="Log in to your Swivel Audio account portal">
+        Sign in with the email address you used to purchase the plugin.
+      </Step>
+      <Step title="Open My licenses">
+        All license keys associated with your account are listed here.
+      </Step>
+      <Step title="Can't log in or don't have an account?">
+        Use the **Recover license** option on the portal login page. Enter your purchase email address and Swivel Audio will send a recovery link to that address.
+      </Step>
+    </Steps>
+
+    If you no longer have access to the email address used for purchase, contact Swivel Audio support with your order number or payment receipt.
+  </Accordion>
+
+  <Accordion title="The plugin says 'License expired' — what do I do?">
+    Your subscription has lapsed. If you're still within the 7-day grace period, the plugin continues to work while you renew. Once the grace period ends, the plugin will stop functioning until the license is renewed.
+
+    <Steps>
+      <Step title="Log in to your account portal">
+        Navigate to **My licenses** and find the expired license.
+      </Step>
+      <Step title="Click Renew and complete the purchase">
+        Once your subscription is active again, the plugin picks up the new expiry date on its next heartbeat — usually within a few minutes.
+      </Step>
+      <Step title="Re-activate if the plugin doesn't update automatically">
+        Open the plugin's license panel, deactivate, and re-enter your key to force an immediate re-validation.
+      </Step>
+    </Steps>
+
+    <Tip>
+      Renew before the grace period ends to avoid any interruption to your workflow.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="I upgraded my hardware and activation fails — what do I do?">
+    Minor hardware changes — adding RAM, replacing a drive, updating your OS — are handled by Swivel Audio's fuzzy matching and won't affect your activation.
+
+    If you replaced major components such as your motherboard or CPU, the plugin detects a significant hardware change and returns a `MACHINE_MISMATCH` error. To resolve this:
+
+    <Steps>
+      <Step title="Remove the old machine entry from the portal">
+        Log in to your account portal, open **My licenses → Active machines**, and deactivate the entry for the machine with the old hardware.
+      </Step>
+      <Step title="Re-activate on the updated machine">
+        Open the plugin's license panel, enter your key, and activate. This registers the new hardware fingerprint.
+      </Step>
+    </Steps>
+
+    <Note>
+      This uses your normal activation slot — it doesn't count as an extra machine, as long as you remove the old entry first.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Can I use the plugin offline?">
+    Yes. Once activated, the plugin stores a signed license file locally and continues to work without an internet connection. The plugin periodically checks in with the Swivel server when internet is available, but it doesn't require a constant connection.
+
+    For machines with no internet access at all, Swivel supports a **challenge-response** offline activation flow. You generate a challenge on the offline machine, exchange it for a signed license file from a connected device, and import the response back into the plugin. See [Offline activation](/offline/overview) for step-by-step instructions.
+  </Accordion>
+
+  <Accordion title="I reinstalled my OS — do I need to deactivate the plugin first?">
+    No. Swivel Audio recognizes your machine after an OS reinstall and reuses the same activation slot. You don't lose a slot and you don't need to deactivate before reinstalling.
+
+    After reinstalling, install the plugin again and re-enter your license key to activate. The machine slot will be recognized as the same machine.
+  </Accordion>
+
+  <Accordion title="My license shows 'suspended' — what does that mean?">
+    A suspended license has been temporarily disabled. The plugin cannot be activated while the license is in a suspended state.
+
+    Suspension can occur for reasons such as a chargeback on the original purchase or an account verification issue. Contact Swivel Audio support with your license key and order details to understand why your license was suspended and what steps are needed to restore it.
+
+    <Warning>
+      Repeatedly attempting to activate a suspended license will not restore access. Contact support directly.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="My offline license TTL expired — what do I do?">
+    The offline token your plugin cached has a time-to-live (TTL) and has expired before the plugin could reach the license server to refresh it.
+
+    <Steps>
+      <Step title="Connect the machine to the internet">
+        Even a brief connection is enough for the plugin to refresh its token automatically.
+      </Step>
+      <Step title="Open the plugin in your DAW">
+        The plugin will contact the license server and renew the local token.
+      </Step>
+      <Step title="Still not working?">
+        Open the plugin's license panel, deactivate, and re-activate with your key. This forces a full re-validation and issues a fresh token.
+      </Step>
+    </Steps>
+
+    If your workflow requires extended offline operation, contact Swivel Audio support to request an extended offline license.
+  </Accordion>
+
+  <Accordion title="I bought the plugin but no license appeared — what do I do?">
+    Licenses are typically delivered within a few minutes of purchase. If yours hasn't appeared, try the following:
+
+    <Steps>
+      <Step title="Check your spam or junk folder">
+        The confirmation email containing your license key may have been filtered.
+      </Step>
+      <Step title="Log in to your account portal">
+        Licenses sometimes appear in the portal before the confirmation email arrives. Check **My licenses**.
+      </Step>
+      <Step title="Use the license recovery tool">
+        On the portal login page, click **Recover license** and enter your purchase email address to resend all keys associated with that address.
+      </Step>
+      <Step title="Contact support with proof of purchase">
+        If none of the above works, reach out to Swivel Audio support with your order number or a screenshot of the payment confirmation. Support can manually issue the license.
+      </Step>
+    </Steps>
+  </Accordion>
+
+  <Accordion title="Can I transfer my license to another person?">
+    License transferability depends on your license type and the terms of your purchase. To find out whether your specific license can be transferred, contact Swivel Audio support with your license key and the details of the transfer you're requesting.
+
+    Support will confirm whether a transfer is permitted and walk you through the process if it is.
+  </Accordion>
+
+</AccordionGroup>
+
+Didn't find what you were looking for? Contact Swivel Audio support with your license key, a description of the issue, and any error codes you've seen.

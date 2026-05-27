@@ -1,0 +1,59 @@
+---
+title: "Activate Swivel plugins without an internet connection"
+description: "Learn how offline activation works for Swivel Audio plugins — when to use it, how the challenge-response process works, and how the offline license expires."
+keywords: ["offline activation", "air-gapped", "no internet", "challenge response", "swivel audio offline", "offline license"]
+---
+
+Offline activation lets you use Swivel Audio plugins on machines that can't reach the Swivel server. Instead of the plugin contacting the server directly during activation, you carry files between the offline machine and an internet-connected device to complete the process. This is useful for dedicated studio computers without network access, air-gapped production workstations, or any machine where outbound internet access is restricted.
+
+## When to use offline activation
+
+- Your studio computer or recording workstation has no internet connection.
+- Your machine is on an isolated network that doesn't allow external connections.
+- You prefer to keep your DAW machine offline for performance or security reasons.
+
+## How the challenge-response process works
+
+Offline activation uses a challenge-response exchange. The offline machine generates a challenge, you bring it to an internet-connected device to get a response, then bring the response back.
+
+<Steps>
+  <Step title="Generate a challenge on the offline machine">
+    Open the plugin in your DAW and go to the license panel. Click **Activate Offline**. The plugin generates a challenge — a short block of text that identifies your machine and the product — and lets you copy or export it.
+  </Step>
+  <Step title="Transfer the challenge to an internet-connected device">
+    Copy the challenge text to a USB drive, send it to yourself via phone, or transfer it by any means you have available.
+  </Step>
+  <Step title="Submit the challenge with your license key">
+    On the internet-connected device, submit the challenge along with your license key to the Swivel server. The server validates your key, checks your machine limit, and confirms your entitlements. See [Challenge-response activation](/offline/challenge-response) for the exact steps.
+  </Step>
+  <Step title="Receive the response">
+    The server returns a response containing a signed license file. Copy or export this response.
+  </Step>
+  <Step title="Transfer the response back to the offline machine">
+    Move the response back to the offline machine using the same transfer method.
+  </Step>
+  <Step title="Import the response in the plugin">
+    In the plugin's license panel, import or paste the response. The plugin activates and stores the signed license file locally.
+  </Step>
+</Steps>
+
+## Offline license expiry
+
+The signed license file the plugin stores after offline activation is valid for a limited number of days. This period is set per product — your license panel shows when the offline license expires. Once it expires, the plugin will lock and you need to repeat the challenge-response process to get a fresh license file.
+
+<Note>
+The offline license expiry is separate from your license subscription. Repeating the challenge-response process before the expiry date does not consume an extra machine slot — the system recognizes your machine and renews the signed file in place.
+</Note>
+
+## Offline deactivation
+
+If you need to free a machine slot and the machine can't go online, standard deactivation won't work. Offline deactivation lets you generate a deactivation request on the offline machine and submit it from another device, freeing the slot without the offline machine ever touching the internet. See [Offline deactivation](/offline/deactivation).
+
+<CardGroup cols={2}>
+  <Card title="Challenge-response activation" icon="arrows-rotate" href="/offline/challenge-response">
+    Step-by-step instructions for completing an offline activation.
+  </Card>
+  <Card title="Offline deactivation" icon="circle-minus" href="/offline/deactivation">
+    Free a machine slot from a computer that can't go online.
+  </Card>
+</CardGroup>

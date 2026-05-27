@@ -1,0 +1,94 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "almond",
+  "name": "Swivel Licensing",
+  "logo": {
+    "light": "https://media.brand.dev/5845a2c5-004f-45b6-bf33-2538133c0250.png",
+    "dark": "https://media.brand.dev/5845a2c5-004f-45b6-bf33-2538133c0250.png"
+  },
+  "favicon": "",
+  "colors": {
+    "primary": "#2c1d15",
+    "light": "#94948e",
+    "dark": "#dedbd8"
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/koltyj/swivel-licensing-platform"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Your Licenses",
+            "pages": [
+              "licenses/overview",
+              "licenses/find-your-license",
+              "licenses/activation",
+              "licenses/deactivation"
+            ]
+          },
+          {
+            "group": "Offline Activation",
+            "pages": [
+              "offline/overview",
+              "offline/challenge-response",
+              "offline/deactivation"
+            ]
+          },
+          {
+            "group": "Troubleshooting",
+            "pages": [
+              "troubleshooting/activation-errors",
+              "troubleshooting/machine-limit",
+              "troubleshooting/faq"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Plugin Integration",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "integration/introduction",
+              "integration/juce-client"
+            ]
+          },
+          {
+            "group": "API Reference",
+            "pages": [
+              "api/activate",
+              "api/validate",
+              "api/refresh",
+              "api/deactivate",
+              "api/offline-response",
+              "api/offline-deactivation",
+              "api/license-create"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "webhooks/overview",
+              "webhooks/shopify",
+              "webhooks/woocommerce"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+---
+title: "Swivel Licensing: Plugin License Management"
+description: "Activate, manage, and transfer your Swivel Audio plugin licenses across machines. Find your license key, activate plugins, and get help with common issues."
+---
+
+Welcome to the Swivel Audio licensing hub. Here you'll find everything you need to activate your plugins, manage your machines, and get back to making music quickly — whether you're setting up on a new computer, recovering a lost license, or working entirely offline.
+
+<CardGroup cols={2}>
+  <Card title="Get Started" icon="rocket" href="/introduction">
+    New to Swivel Licensing? Start here to understand how licenses work and what you can do with your account.
+  </Card>
+  <Card title="Quick Start" icon="bolt" href="/quickstart">
+    Activate your first plugin in a few steps — from finding your license key to running your first validation check.
+  </Card>
+  <Card title="Manage Licenses" icon="key" href="/licenses/overview">
+    Look up your licenses, check activation status, and see which machines are using each license.
+  </Card>
+  <Card title="Troubleshooting" icon="circle-question" href="/troubleshooting/faq">
+    Activation not working? Hit a machine limit? Find answers to the most common issues here.
+  </Card>
+</CardGroup>
+
+## How Swivel Licensing works
+
+When you purchase a Swivel Audio plugin, a license is automatically created and linked to your email address. You then activate that license inside the plugin on each computer you use, up to the allowed machine limit.
+
+<Steps>
+  <Step title="Purchase a plugin">
+    Complete your purchase on the Swivel Audio store. Your license is created automatically and a receipt is sent to your email.
+  </Step>
+  <Step title="Find your license key">
+    Visit your [account licenses page](/licenses/find-your-license) or check your purchase receipt email to retrieve your license key.
+  </Step>
+  <Step title="Activate in the plugin">
+    Open the plugin in your DAW, enter your license key in the activation panel, and click **Activate**. The plugin connects to the Swivel server and unlocks processing.
+  </Step>
+  <Step title="Manage machines">
+    Deactivate a machine you no longer use from your [account page](/licenses/deactivation) to free a slot for a new computer.
+  </Step>
+</Steps>
+
+## For plugin developers
+
+If you're integrating Swivel Licensing into your own JUCE-based audio plugin, the [Plugin Integration](/integration/introduction) tab covers the full API and the C++ client library.
+
+<CardGroup cols={2}>
+  <Card title="Integration Guide" icon="plug" href="/integration/introduction">
+    Learn how to integrate the Swivel licensing client into a JUCE audio plugin.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api/activate">
+    Full reference for all plugin-facing activation, validation, and deactivation endpoints.
+  </Card>
+  <Card title="Webhook Setup" icon="webhook" href="/webhooks/overview">
+    Connect your Shopify or WooCommerce store to automatically issue licenses on purchase.
+  </Card>
+  <Card title="JUCE Client" icon="c" href="/integration/juce-client">
+    Drop-in C++ client library for online and offline activation inside JUCE plugins.
+  </Card>
+</CardGroup>

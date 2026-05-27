@@ -1,0 +1,88 @@
+---
+title: "Activate your Swivel Audio plugin on a machine"
+description: "How machine activation works for Swivel Audio plugins — what the plugin does when you enter your key, machine slots, fuzzy matching, and re-activation."
+keywords: ["activate plugin", "license activation", "machine activation", "swivel audio", "sa-color activate"]
+---
+
+Activation registers your computer with your Swivel Audio license. When you enter your license key and click **Activate** in the plugin, the plugin sends your key along with a unique fingerprint of your machine to the Swivel server. If the key is valid, your license is active, and a machine slot is available, the server responds with a signed license file and a refresh token — both stored locally by the plugin. You do not interact with these files directly.
+
+## Before you start
+
+- You have your license key ready. See [Find your license key](/licenses/find-your-license) if you need help locating it.
+- The plugin is installed and loaded in your DAW.
+- Your machine has an internet connection for the initial activation.
+
+## How to activate
+
+<Steps>
+  <Step title="Open the plugin in your DAW">
+    Load your Swivel Audio plugin (for example, SA-Color) on a track. Click the **Activate** or **License** button in the plugin interface to open the activation panel.
+  </Step>
+  <Step title="Enter your license key">
+    Type or paste your license key into the license key field. The key is a string specific to the product you purchased.
+  </Step>
+  <Step title="Click Activate">
+    Click the **Activate** button. The plugin sends your key, machine fingerprint, and hardware details to the Swivel server. You do not need to enter your fingerprint manually — the plugin generates it.
+  </Step>
+  <Step title="Activation completes">
+    If your key is valid and a slot is available, activation succeeds. The plugin stores the signed license file and refresh token and shows your license as active. You can now use the plugin on this machine.
+  </Step>
+</Steps>
+
+## What the plugin stores after activation
+
+After a successful activation, the plugin stores two things locally:
+
+- **Signed license file** — a cryptographically signed file the plugin uses to verify your license, including when offline.
+- **Refresh token** — a token the plugin uses to periodically re-validate your license with the Swivel server.
+
+You do not manage these files. The plugin handles renewals and validation checks automatically.
+
+## Machine limit and the 409 error
+
+Each license allows activation on a limited number of machines simultaneously. If you have already used all your available slots, the activation request fails with a `machine_limit_reached` error. The plugin will display a message telling you how many machines are currently active.
+
+The response looks like this:
+
+```json
+{
+  "error": "machine_limit_reached",
+  "machine_count": 3,
+  "max_machines": 3,
+  "active_machines": [
+    {
+      "id_tail": "a1b2c3d4",
+      "platform": "darwin",
+      "activated_at": "2025-11-01T10:00:00.000Z",
+      "last_heartbeat": "2026-01-15T08:30:00.000Z"
+    }
+  ]
+}
+```
+
+The `active_machines` list shows the machines currently using your slots, including their platform and when they last checked in. To activate on a new machine, you need to deactivate one of the machines listed. See [Deactivation](/licenses/deactivation).
+
+## Fuzzy machine matching
+
+Your plugin generates a fingerprint from your hardware. If your fingerprint changes slightly — for example, because you added RAM, upgraded your operating system, or replaced a minor component — the system compares the new fingerprint against the hardware components stored from your last activation. If enough components still match, the system recognizes your computer as the same machine and does not use a new activation slot.
+
+<Note>
+Normal hardware upgrades and OS updates should not cause you to lose an activation slot. Only a significant change to your machine's hardware — or a full reinstall on a different computer — would create a new slot.
+</Note>
+
+## Reinstalling your operating system
+
+If you reinstall your operating system on the same physical machine and re-activate, the system reuses the same machine slot. You do not lose a slot or need to deactivate first.
+
+## After activation
+
+Once activated, the plugin validates your license automatically each time it loads. Validation uses the stored refresh token and does not require you to re-enter your key. The plugin contacts the Swivel server periodically to refresh the license file. If you are offline, the plugin uses the stored license file until it expires.
+
+<CardGroup cols={2}>
+  <Card title="Deactivation" icon="rotate-left" href="/licenses/deactivation">
+    Free a machine slot by deactivating a computer you no longer use.
+  </Card>
+  <Card title="Offline activation" icon="wifi-slash" href="/offline/overview">
+    Activate and use the plugin on machines without an internet connection.
+  </Card>
+</CardGroup>

@@ -1,0 +1,69 @@
+---
+title: "Set up the WooCommerce webhook for automatic licensing"
+description: "Create an order webhook in WooCommerce to have Swivel automatically issue licenses whenever a customer's order reaches a paid status in your store."
+keywords: ["woocommerce webhook", "order completed", "license automation", "hmac", "woocommerce integration"]
+---
+
+When an order in your WooCommerce store reaches a paid status, WooCommerce can notify Swivel immediately. Swivel verifies the request signature, maps the purchased SKUs to products in your account, and issues licenses automatically.
+
+## Webhook URL
+
+Your tenant-specific endpoint follows this pattern:
+
+```
+https://app.swivel.audio/api/webhooks/woocommerce/{tenantSlug}
+```
+
+Replace `{tenantSlug}` with the slug for your Swivel tenant. You can find it in your Swivel dashboard under **Settings → Integrations**.
+
+## Event to register
+
+Register the **Order updated** event (resource: `order`, event: `updated`). Swivel checks the order status on every delivery and only issues licenses when the status is a configured paid status — by default `completed`. Orders in other statuses (such as `pending` or `processing`) are acknowledged with `200 OK` and ignored.
+
+Swivel also handles `cancelled` and `refunded` statuses by suspending the corresponding licenses, and accepts `refund` resource events to process partial refunds.
+
+## How WooCommerce signs requests
+
+WooCommerce computes an HMAC-SHA256 over the raw JSON payload using a secret you configure, then base64-encodes the result. The signature is delivered in the `X-WC-Webhook-Signature` header. Swivel rejects requests that do not pass this verification.
+
+Swivel supports secret rotation: during a rotation both the current and previous secrets are accepted until all in-flight deliveries clear.
+
+## SKU mapping
+
+Swivel maps each order line item to a product using the item's SKU. Go to **Swivel → Products** and add a WooCommerce SKU to each product you want licensed automatically. Line items with no matching SKU are skipped without error.
+
+## Setup
+
+<Steps>
+  <Step title="Open webhook settings in WooCommerce">
+    Log in to your WordPress admin. Go to **WooCommerce → Settings → Advanced → Webhooks**. Click **Add webhook**.
+  </Step>
+  <Step title="Configure the webhook">
+    Fill in the following fields:
+
+    | Field | Value |
+    |---|---|
+    | Name | `Swivel license issuance` (or any label you prefer) |
+    | Status | `Active` |
+    | Topic | `Order updated` |
+    | Delivery URL | `https://app.swivel.audio/api/webhooks/woocommerce/{tenantSlug}` |
+    | Secret | A long random string you generate (see next step) |
+    | API version | WP REST API Integration v3 |
+  </Step>
+  <Step title="Generate and copy the secret">
+    Create a strong random secret — for example, use a password manager or run `openssl rand -base64 32` in a terminal. Enter it in the **Secret** field in WooCommerce and copy it for the next step.
+  </Step>
+  <Step title="Add the secret to Swivel">
+    In your Swivel dashboard, go to **Settings → Integrations → WooCommerce**. Paste the secret into the **Webhook secret** field and save.
+  </Step>
+  <Step title="Save and verify delivery">
+    Click **Save webhook** in WooCommerce. Place a test order and set its status to **Completed**. Check **Swivel → Logs** to confirm the event was received, verified, and a license was issued.
+  </Step>
+  <Step title="Map your SKUs">
+    Go to **Swivel → Products** and add the WooCommerce SKU to each product. Line items with no matching SKU are silently skipped.
+  </Step>
+</Steps>
+
+## Idempotency
+
+WooCommerce retries failed deliveries automatically. Swivel constructs a unique event ID from the `X-WC-Webhook-ID` and `X-WC-Webhook-Delivery-ID` headers and uses it to deduplicate events. If the same delivery arrives more than once, Swivel returns `200 OK` without creating a second license.

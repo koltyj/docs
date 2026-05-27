@@ -1,0 +1,83 @@
+---
+title: "GET /api/licenses/refresh — Rotate token and license file"
+sidebarTitle: "GET /api/licenses/refresh"
+description: "Rotate the refresh token and get a fresh signed license file for an active machine. The previous token is invalidated immediately on every successful call."
+---
+
+Call this endpoint to obtain a fresh signed license file and a rotated refresh token without re-validating the machine fingerprint or entitlements. Use it when the license file is approaching its offline TTL and a full validation call is unnecessary. The server verifies the license is still active, confirms the machine is not deactivated, checks the token version to prevent replay, then atomically increments the token version and returns new credentials.
+
+**Endpoint:** `GET /api/licenses/refresh`
+
+**Authentication:** Bearer token — the `refresh_token` returned by `/api/licenses/activate` or a previous call to this endpoint.
+
+```
+Authorization: Bearer <refresh_token>
+```
+
+<Warning>
+  This endpoint rotates the refresh token on every successful call. The token you sent in the request is immediately invalidated — replace your locally stored token with the `refresh_token` value in the response before the next request.
+</Warning>
+
+## Request
+
+This endpoint has no request body. All required information is read from the Bearer token.
+
+## Response
+
+<ResponseField name="refreshed" type="boolean">
+  Always `true` on a successful response.
+</ResponseField>
+
+<ResponseField name="license_file" type="string">
+  Freshly signed PEM license file. Replace the cached copy on disk with this value.
+</ResponseField>
+
+<ResponseField name="refresh_token" type="string">
+  New JWT refresh token. This token has an incremented version — store it immediately and discard the previous token. The previous token is now stale and all subsequent calls must use this new value.
+</ResponseField>
+
+## Error codes
+
+| Code | Status | Meaning |
+|------|--------|---------|
+| `missing_token` | 401 | No `Authorization` header was supplied. |
+| `INVALID_TOKEN` | 401 | JWT signature is invalid or the token has expired. |
+| `stale_refresh_token` | 401 | Token version is behind the current machine record. This happens if another refresh call already rotated the token (e.g. a concurrent request or a prior call whose response was not persisted). Re-activate to obtain a new token. |
+| `license_not_active` | 403 | License is `"suspended"` or `"revoked"`. The `status` field in the error body indicates which. |
+| `license_expired` | 403 | License has expired and the 7-day grace period has passed. |
+| `machine_deactivated` | 403 | The machine associated with this token has been deactivated. |
+| `license_not_found` | 404 | No license found for the token's `license_id` claim. |
+| `machine_not_found` | 404 | No machine found for the token's `machine_id` claim. |
+| `license_file_creation_failed` | 500 | Signing key misconfiguration prevented the license file from being generated. Contact support. |
+| `token_signing_failed` | 500 | Refresh token signing failed. The token version was not incremented — retry the call. |
+
+<Note>
+  Unlike `/api/licenses/validate`, this endpoint does **not** re-check the machine fingerprint or entitlements. It is a lightweight credential rotation call. If you need to confirm the license is still entitled to a specific product or that the fingerprint is still valid, use `/api/licenses/validate` instead.
+</Note>
+
+## Example
+
+**Request**
+
+```
+GET /api/licenses/refresh
+Authorization: Bearer eyJhbGciOiJFZERTQSJ9...
+```
+
+**Response (200)**
+
+```json
+{
+  "refreshed": true,
+  "license_file": "-----BEGIN LICENSE FILE-----\n...\n-----END LICENSE FILE-----",
+  "refresh_token": "eyJhbGciOiJFZERTQSJ9...<new token>"
+}
+```
+
+**Response (401 — stale token)**
+
+```json
+{
+  "error": "stale_refresh_token"
+}
+```

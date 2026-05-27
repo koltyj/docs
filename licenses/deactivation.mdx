@@ -1,0 +1,81 @@
+---
+title: "Deactivate a plugin license from a machine"
+description: "How to deactivate a Swivel Audio plugin license from a machine — free a slot before selling your computer, replacing it, or activating on a new one."
+keywords: ["deactivate plugin", "license deactivation", "free machine slot", "swivel audio", "remove license"]
+---
+
+Deactivating a machine removes it from your license's active machine list and frees that slot so you can activate on a different computer. You should deactivate before selling or replacing a machine, or whenever you want to move your license to a new system.
+
+## When to deactivate
+
+- You are selling or giving away a computer that has the plugin activated on it.
+- You are replacing a machine and want to activate on the new one but have no remaining slots.
+- You upgraded to a new computer and want to clean up the old machine from your license.
+
+## How to deactivate from within the plugin
+
+This is the preferred method. It uses the refresh token stored on your machine to authenticate the deactivation request securely.
+
+<Steps>
+  <Step title="Open the plugin in your DAW">
+    Load the Swivel Audio plugin on a track. Open the **License** or **Activation** panel.
+  </Step>
+  <Step title="Click Deactivate">
+    In the license panel, click the **Deactivate** button. The plugin sends a deactivation request to the Swivel server using your stored refresh token.
+  </Step>
+  <Step title="Deactivation completes">
+    The plugin confirms that the machine has been deactivated. The slot is now free and available for a new machine.
+  </Step>
+</Steps>
+
+## How to deactivate from the account portal
+
+If you cannot access the plugin on the machine you want to deactivate — for example, if the machine is already gone or broken — you can deactivate it from the Swivel customer account page.
+
+<Steps>
+  <Step title="Go to your account page">
+    Visit the Swivel Audio account area and look up your licenses using your email address and order ID.
+  </Step>
+  <Step title="Find the license">
+    Locate the license for the product you want to manage. The page lists all machines currently activated on that license, along with their platform and the last time they checked in.
+  </Step>
+  <Step title="Select the machine and deactivate">
+    Find the machine you want to remove and click **Deactivate** next to it. The slot is freed immediately.
+  </Step>
+</Steps>
+
+## What happens when you deactivate
+
+When a machine is deactivated:
+
+- The machine slot is freed, and your `machines_remaining` count increases by one.
+- The refresh token stored on the deactivated machine is invalidated. The plugin on that machine can no longer validate your license.
+- The deactivation is logged for your account.
+
+The response from a successful deactivation looks like this:
+
+```json
+{
+  "deactivated": true,
+  "machines_remaining": 2
+}
+```
+
+`machines_remaining` shows how many slots are now available for new activations.
+
+## Activating on your new machine
+
+After deactivation frees a slot, you can activate on your new machine immediately. Open the plugin on the new machine, enter your license key, and click **Activate**. See [Activation](/licenses/activation) for the full steps.
+
+<Warning>
+Deactivating from within the plugin requires the refresh token stored on that machine. If the machine is no longer accessible — for example, it was lost, stolen, or no longer boots — use the account portal method instead. If you are unable to deactivate through either method, contact Swivel Audio support.
+</Warning>
+
+<CardGroup cols={2}>
+  <Card title="Activation" icon="key" href="/licenses/activation">
+    Activate the plugin on your new machine after freeing a slot.
+  </Card>
+  <Card title="License overview" icon="file-lines" href="/licenses/overview">
+    Understand machine limits, statuses, and how your license is structured.
+  </Card>
+</CardGroup>
